@@ -317,7 +317,7 @@ So we can install packages you see listed and can search on https://melpa.org
 
 #+begin_src emacs-lisp :noweb yes :tangle yes
   (use-package alert
-    :ensure t
+    ;; :ensure t ;; uncomment to avoid using nix
     :config
     <<alert-config>>
     )
@@ -371,7 +371,8 @@ avoid counting existing garbage which needs collection."
 :END:
 
 #+begin_src emacs-lisp :tangle yes
-(setq use-package-always-ensure t) 
+(setq use-package-always-ensure nil)
+;; (setq use-package-always-ensure t) ;; uncomment if not using nix
 #+end_src
 
 *** fix annoyances
@@ -546,7 +547,7 @@ alert is used in core functions and is a special case that must be loaded before
 
 #+begin_src emacs-lisp :noweb yes :tangle yes
 (use-package dashboard
-  :ensure t
+  ;; :ensure t ;; uncomment to avoid using nix
   :config
   (dashboard-setup-startup-hook))
 #+end_src
