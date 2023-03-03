@@ -1145,7 +1145,7 @@ db.employees.count({country: "gb"});
 
 **** then again maybe it was just some of my custom code?
 
-* Tangling plumbing
+* Tangle plumbing
 
 ** Tangle and reload on save
 
