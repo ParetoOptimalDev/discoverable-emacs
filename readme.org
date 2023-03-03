@@ -1,0 +1,11 @@
+emacs distribution aimed at discoverability and lowering the bar to effectively using and extending emacs for newer users.
+
+Requires emacs 29+
+
+Usage:
+
+#+begin_src sh
+git clone https://github.com/ParetoOptimalDev/discoverable-emacs.git
+cd discoverable-emacs
+emacs --init-directory=.
+#+end_src
