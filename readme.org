@@ -7,5 +7,5 @@ Usage:
 #+begin_src sh
 git clone https://github.com/ParetoOptimalDev/discoverable-emacs.git
 cd discoverable-emacs
-emacs --init-directory=.
+nix-develop -c emacs-wrapper --init-directory=.
 #+end_src
