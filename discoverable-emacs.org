@@ -1,0 +1,1195 @@
+# -*- compile-command: "emacs --init-directory=~/code/discoverable-emacs/"; -*-
+:PROPERTIES:
+:header-args: :tangle no :results silent
+:header-args:emacs-lisp: :comments noweb
+:header-args:nix: :comments noweb
+:END:
+#+STARTUP: show2levels indent hidestars
+#+filetags: :project:
+
+* Core Tenets
+
+** Discoverability: discovering features as needed instead of memorizing
+
+*** use right click anywhere to see available contextually relevant actions
+
+**** uses [[id:178e8f77-1324-43fb-a6f5-074801326562][context menu mode]]
+
+*** Interactive help after typing a prefix (e.g. =C-x p)=
+:PROPERTIES:
+:ID:       2466dd9a-7982-4d26-8eaf-13abb5a1e7ab
+:END:
+
+**** For the =C-x p= prefix that would mean typing =C-x p C-h=
+
+***** in practice this looks like
+
+****** think "I need to do something project related"
+
+****** type =C-x p=
+
+****** think "Oh.. I forgot the keybind to search for project files"
+
+****** type =C-h=
+
+**** recap: For any prefix you are "stuck at", add =C-h= after to see all keybindings at that prefix
+
+**** implementation notes                                        :ARCHIVE:
+
+***** Normal behavior is to just display a non-interactive seperate buffer :implementationNote:
+
+#+begin_quote
+‘C-h’ or <F1> mean “help” in various other contexts as well.  For
+instance, you can type them after a prefix key to view a list of the
+keys that can follow the prefix key.
+#+end_quote
+
+Meaning it shows up in a new buffer that IIRC isn't interactive
+
+With consult and marginalia installed, it transforms that buffer into a selection list (wrong word, FIXME) that lets you take the action you wanted and learn the necessary information all at once.
+
+***** depends on 
+
+****** [[id:c6ff362d-9daf-420c-a042-fc1e35dcb249][vertico]]
+
+****** [[id:f76792a8-9623-4636-8953-977fa24e05f1][marginalia]]
+
+****** [[id:72620fc7-33bb-49bd-a3ad-d748e5f9152a][consult]]
+
+*** find the keybinding for a command
+
+**** =M-x= then type the command name
+
+***** this will bring up a [[id:72620fc7-33bb-49bd-a3ad-d748e5f9152a][consult]] (or is it [[id:c6ff362d-9daf-420c-a042-fc1e35dcb249][vertico]]) window
+
+***** then to the right the [[id:f76792a8-9623-4636-8953-977fa24e05f1][marginalia]] lighter will display the keybinding if one exists
+
+***** type =C-g= because [[id:daaf2059-3760-4751-8a5e-bf96725d0efd][C-g (or ctrl+g) is the universal way to exit prompts and kill processes in emacs]]
+** This document aims to be both a usage and implementation guide
+
+*** so it aims to teach
+
+**** how to accomplish things with functionality
+
+**** how that functionality is implemented
+
+*** so that you may
+
+**** extend, modify, or otherwise customize that functionality
+
+**** in order to accomplish things more specific to your work
+
+* Guides
+
+** Necessary basic emacs knowledge
+
+*** How to switch back to this buffer from anywhere
+
+**** using the keyboard
+
+***** press =C-x b=
+
+***** a list of buffers open will show up
+
+***** use arrow keys to select =discoverable-emacs.org=
+
+***** hit =RET= (aka the enter key)
+
+**** using the menu bar (aka file edit menu)
+
+***** click "Buffers" and a list will be presented
+
+***** click =discoverable-emacs.org=
+
+*** Go through [[elisp:(help-with-tutorial nil t)][the tutorial (AKA. M-x tutorial, C-h t)]]
+
+*** C-g (or ctrl+g) is the universal way to exit prompts and kill processes in emacs (like your computers ESC key)
+:PROPERTIES:
+:ID:       daaf2059-3760-4751-8a5e-bf96725d0efd
+:END:
+
+
+*** review [[https://sachachua.com/blog/2013/05/how-to-learn-emacs-a-hand-drawn-one-pager-for-beginners/][Hand-drawn concise infographic aimed at Emacs beginners]]
+
+**** meta                                                        :ARCHIVE:
+
+***** TODO use org-attach and inline images to display it here
+
+***** TODO create a function to display the cheatsheet
+
+** Personal Information Management (PIM)
+
+*** TODO Using org-roam to track knowledge
+
+** Appearance
+
+*** changing themes with [[elisp:(call-interactively 'consult-theme)][M-x consult-theme]]
+
+** Development
+
+*** project-scoped tabs containing only project related buffers 
+
+*** searching in a project
+
+**** for files by name:  [[id:401ccd9c-2937-4f55-b5ec-146d4fddca17][C-x p f (aka. M-x project-find-file)]]
+
+***** from within a project use 
+
+***** [[elisp:(consult-find-file "discoverable-emacs.org")][M-x consult-find-file discoverable-emacs.org RET]]
+
+**** for a regex:             [[id:d621411c-5ade-49cf-971b-cc42a908954a][C-x p s someRegex RET]]
+
+*** project based commands
+
+**** List all possible project based commands and optionally select one or [[id:daaf2059-3760-4751-8a5e-bf96725d0efd][C-g]] out of consult window/prompt
+
+***** use =C-x p C-h=
+
+****** meta                                                    :ARCHIVE:
+
+
+******* TODO figure out how to make this a link like the others?
+
+******* note that there is no M-x equivalent?
+
+**** [[elisp:(call-interactively 'project-switch-project)][C-x p p (aka. M-x project-switch-project)]]
+:PROPERTIES:
+:ID:       129e0560-e3cc-4977-a377-cdf056df7aeb
+:END:
+
+**** [[elisp:(call-interactively 'project-find-file)][C-x p f (aka. M-x project-find-file)]]
+:PROPERTIES:
+:ID:       401ccd9c-2937-4f55-b5ec-146d4fddca17
+:END:
+
+******  this link will use current project (aka git repo)
+
+****** ~NOTE~: not sure you are in a project? see [[id:129e0560-e3cc-4977-a377-cdf056df7aeb][M-x project-switch-project]]
+
+****  [[elisp:(project-search "discoverable-emacs.org")][C-x p s someRegex RET]]
+:PROPERTIES:
+:ID:       d621411c-5ade-49cf-971b-cc42a908954a
+:END:
+
+***** meta                                                      :ARCHIVE:
+
+****** TODO link broken or works fine in no org-roam repo with questionable submodules that probably need ignored?
+
+*** comparing differences between buffers
+
+**** ediff
+
+***** 
+
+*** quick distraction-free research with emacs text-browser [[info:eww#Top][eww]]
+
+**** escape-hatch: =&= aka [[help:eww-browse-with-external-browser][M-x eww-browse-with-external-browser]]
+
+This will open any page in your default browser. Typically search results are fine and most pages from the search results are fine in the text browser. For the times they aren't though, this will fix it.
+
+**** TODO reference and explain stuff in [[id:CDF7A6F3-5740-4B90-8C0A-206FADA1A00B][eww]]
+
+*** TODO common tasks in a devcontainer
+
+**** TODO opening a devcontainer
+
+***** TODO opening a docker container
+
+***** ~NOTE~ after using a project command from within a docker container, devcontainer, or really any [[info:tramp#Inline methods][tramp#Inline methods]] that project will be accessible using [[id:129e0560-e3cc-4977-a377-cdf056df7aeb][C-x p p (aka. M-x project-switch-project)]]
+
+****** if necessary you can also use 
+
+**** TODO running a shell inside the devcontainer with tramp
+
+***** TODO configure tramp to use the right PATH
+
+[[info:tramp#Remote programs][tramp#Remote programs]]
+
+#+begin_src emacs-lisp :noweb-ref tramp-config
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+#+end_src
+
+*** Using 
+
+** Collaboration
+
+*** use beacon.el to make modifications and cursor position more obvious to non-emacs users
+
+*** share weird behavior or cool things with [[id:F3538C74-0BEC-46FE-BBF8-C01D9AC1F25D][gif-screencast-mode]]
+
+** Navigation
+
+*** I recommend using bookmarks, browse through [[info:emacs#Bookmarks][emacs#Bookmarks]]
+
+**** pre-requisite: understand how to use the built-in [[info:info#Top][info]] documentation
+
+* FAQs
+
+** I'm in a "buffer", how in the world do I know what to do?
+
+*** Wait... what's a buffer?
+
+It's what you may call a "window". There can be multiple split windows or "buffers" in emacs.
+
+It's worth getting used to what emacs calls each of these things though to better understand tutorials, documentation, and accurately ask others for help.
+
+If you go on to extend emacs with elisp, it becomes even more valuable to know these concepts.
+
+The below example may be enough to form a good understanding of frames, buffers, and windows:
+
+- frames contain a set of windows and are what you might call the "window" in your OS
+- windows can contain buffers
+- buffers can contain anything and may or not represent files saved to disk
+  
+See related documentation:
+
+- [[info:emacs#Buffers][emacs#Buffers]]
+- [[info:emacs#Windows][emacs#Windows]]
+- [[info:emacs#Frames][emacs#Frames]]
+
+*** First right click and see what options are available
+
+**** For example, in a document in =org mode= like this one I see
+
+[[file:images/context-menu-in-org-mode-screenshot.png]]
+
+**** you'll see there are quite a few categories of relevant actions
+
+**** still feel unsure? Create a new scratch buffer or file with =org-mode= activated and try experimenting!
+
+* Configuration
+
+** core
+
+*** init
+
+**** add [[https://melpa.org/][Melpa]] to package-sources
+
+So we can install packages you see listed and can search on https://melpa.org
+
+#+begin_src emacs-lisp :tangle yes
+(require 'package)
+(add-to-list 'package-archives  '("melpa" . "https://melpa.org/packages/"))
+#+end_src
+
+*** improve discoverability by adding discoverable emacs options to menu-bar :unliterate:
+
+#+begin_src emacs-lisp :tangle yes
+  (defvar menuitem3
+    '("Appearance"
+      ["Change theme" (call-interactively 'consult-theme)]
+      ;; ("SubSubmenu"
+      ;;  ["This will do wonders" (lambda () (interactive) (beep)) [:help "Welcome to the banana"]]
+      ;;  ["And this will do nothing" (lambda () (interactive))])
+      ;; ("SubSubmenu2"
+      ;;  ["Boring alias" (replace-string " " " banana ")])
+      )
+    )
+
+  (defvar menuitem4
+    '("Roam"
+      ["Today" (call-interactively 'org-roam-dailies-find-today)]
+      ["Yesterday" (call-interactively 'org-roam-dailies-find-yesterday)]
+      ["Find/Create node" (call-interactively 'org-roam-node-find)]
+      ["Insert link to node" (call-interactively 'org-roam-node-insert)]
+      ["--" 'ignore]
+      ["Random node" (call-interactively 'org-roam-node-random)]
+      ["Go to date" (call-interactively 'org-roam-dailies-find-today)]
+      )
+    )
+
+  (easy-menu-define test-menu nil "Menu used as an example."
+    `("Test menu"
+      ,menuitem3
+      ,menuitem4
+      ;; ["Items can also be defined here" (lambda () (interactive) (message-box "It's simple!"))]
+      )
+    )
+
+  (define-key-after (lookup-key global-map [menu-bar])
+    [mymenu] ; shortcut for our menu
+    (cons "Discoverable Emacs" test-menu) 'options)
+#+end_src
+
+*** core functions (order matters)
+
+**** require alert early since core functions require it
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+  (use-package alert
+    :ensure t
+    :config
+    <<alert-config>>
+    )
+#+end_src
+
+
+**** core/emacs-tangle-and-show-alert-with-cpu-time
+:PROPERTIES:
+:ID:       1x160a50kpj0
+:END:
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(defun core/emacs-tangle-and-show-alert-with-cpu-time ()
+  (interactive)
+  (let ((gc-cons-threshold most-positive-fixnum))
+    (alert (format "Tangling emacs took: %.3fs"
+                   (caaddr (core/bench 1
+                             (org-babel-tangle)))))))
+#+end_src
+
+***** depends on
+
+****** [[id:351212b6-4b31-44d7-a2ae-3cc3811c40d1][core/bench]]
+
+**** core/bench
+:PROPERTIES:
+:ID:       351212b6-4b31-44d7-a2ae-3cc3811c40d1
+:END:
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+;;;###autoload
+(cl-defmacro core/bench (&optional (times 100000) &rest body)
+  "Call `benchmark-run-compiled' on BODY with TIMES iterations, returning list suitable for Org source block evaluation.
+Garbage is collected before calling `benchmark-run-compiled' to
+avoid counting existing garbage which needs collection."
+  (declare (indent defun))
+  `(progn
+     (garbage-collect)
+     (list '("Total runtime" "# of GCs" "Total GC runtime")
+           'hline
+           (benchmark-run-compiled ,times
+             (progn
+               ,@body)))))
+#+end_src
+
+*** setup that has to happen first (order matters)
+
+**** use package always ensure so each listed package is installed
+:PROPERTIES:
+:ID:       63EDC5D3-C2E5-4621-A913-0655D45C3B1F
+:END:
+
+#+begin_src emacs-lisp :tangle yes
+(setq use-package-always-ensure t) 
+#+end_src
+
+*** fix annoyances
+
+**** turn off bell
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(setq ring-bell-function 'ignore) 
+#+end_src
+
+**** =yes-or-no-p= ---> =y-or-n-p=
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+** appearance (keep heading above [[id:320A3A17-48F8-4D2A-A40C-26F29DBF5782][use-package]])
+
+*** NOTE: order matters with appearance, this should be left at top
+
+
+*** load a nice theme and provide interactive theme selection
+
+NOTE theme is loaded in init.el, then user can select a theme. To persist it use load-theme like below and if needed =use-package= to install the theme(s) first.
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package doom-themes)
+    ;;  (load-theme 'doom-one t)
+    ;; (load-theme 'modus-vivendi t)
+#+end_src
+
+*** disable toolbar but ensure menu-bar is always active
+:PROPERTIES:
+:ID:       521cb647-37e6-4454-be9b-c97a0bbc7f76
+:END:
+
+#+begin_src emacs-lisp :tangle yes
+(tool-bar-mode 0)
+(menu-bar-mode 1)
+#+end_src
+
+*** TODO use larger font size by default, maybe a nice default font family too?
+
+#+begin_src emacs-lisp :tangle yes
+(custom-set-faces '(default ((t (:family "Roboto Mono" :height 160))))
+                  '(fixed-pitch ((t (:family "Roboto Mono" :height 160))))
+                  '(variable-pitch ((t (:family "Lato" :height 170)))))
+
+(setq-default line-spacing nil)
+
+;; default
+(dolist (face '(default fixed-pitch))
+  (set-face-attribute `,face nil :family "Roboto Mono" :height 160))
+#+end_src
+
+*** sane word wrapping
+
+*** meta                                                          :ARCHIVE:
+
+**** TODO take advantage of noweb to make order not matter here
+
+** installed packages
+:PROPERTIES:
+:header-args:emacs-lisp: :noweb yes :comments noweb
+:ID:       320A3A17-48F8-4D2A-A40C-26F29DBF5782
+:END:
+
+*** [[id:63EDC5D3-C2E5-4621-A913-0655D45C3B1F][use package always ensure so each listed package is installed]]
+
+*** TODO link to =add [[https://melpa.org/][Melpa]] to package-sources= 
+
+*** alert.el
+:PROPERTIES:
+:ID:       3039A5B3-AF89-4556-AFB3-40E62F450598
+:END:
+
+alert is used in core functions and is a special case that must be loaded before those core functions here
+
+
+**** use libnotify for alert
+
+#+begin_src emacs-lisp :noweb-ref alert-config
+  (setq alert-default-style 'libnotify)
+#+end_src
+
+*** emacs
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package emacs
+    :bind
+    <<emacs-keybinds>>
+    :config
+    <<emacs-config>>
+    )
+#+end_src
+
+**** avoid making a new frame (aka os window) for [[help:ediff][ediff]]'s control buffer
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+#+end_src
+
+**** upgrade =list-buffer= to  =ibuffer=
+
+#+begin_src emacs-lisp :noweb-ref emacs-keybinds
+  ("C-x C-b" . 'ibuffer)
+#+end_src
+
+**** save bookmarks when one is created or deleted
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(setq bookmark-save-flag 1)
+#+end_src
+
+**** enable pixel by pixel scrolling by default
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+  (pixel-scroll-precision-mode 1)
+#+end_src
+
+*** TODO org                                                   :unliterate:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+  (use-package org
+    :ensure nil
+    :hook
+    (org-mode . my/org-mode-setup)
+    :config
+    (setq org-ellipsis " ▾")
+    (setq org-cycle-separator-lines -1)
+    (setq org-return-follows-link t)
+
+    (defun set-fixed-pitch-org-attributes ()
+
+      ;; Make sure org-indent face is available
+      (require 'org-indent)
+
+      ;; ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+      (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+      (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+      (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+
+    (defun my/org-mode-setup ()
+      ;; TODO not 100% this is working, lol
+      (org-indent-mode 1)
+      (variable-pitch-mode 1)
+      (set-fixed-pitch-org-attributes)
+      )
+    )
+#+end_src
+
+*** org-babel                                                  :unliterate:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+  (use-package ob
+    :ensure nil
+    :config
+    (setq org-confirm-babel-evaluate nil)
+       (org-babel-do-load-languages
+        'org-babel-load-languages
+        '((emacs-lisp . t)
+          (shell . t)
+          (haskell . t)
+          )))
+#+end_src
+
+*** dashboard
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+#+end_src
+
+*** TODO org-modern
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+  (use-package org-modern)
+#+end_src
+
+**** use libnotify for alert
+
+#+begin_src emacs-lisp :noweb-ref alert-config
+  (setq alert-default-style 'libnotify)
+#+end_src
+
+*** TODO vertico
+:PROPERTIES:
+:ID:       c6ff362d-9daf-420c-a042-fc1e35dcb249
+:END:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+(use-package vertico
+  :init
+    <<vertico-config>>
+    )
+#+end_src
+
+**** init vertico
+
+  #+begin_src emacs-lisp :noweb-ref vertico-config
+  (require 'vertico)
+  (vertico-mode)
+  #+end_src
+
+*** TODO no-littering
+:PROPERTIES:
+:ID:       c6ff362d-9daf-420c-a042-fc1e35dcb249
+:END:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+(use-package no-littering)
+#+end_src
+
+*** TODO consult                                               :unliterate:
+:PROPERTIES:
+:ID:       72620fc7-33bb-49bd-a3ad-d748e5f9152a
+:END:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+(use-package consult
+    <<unliterate-consult-use-package-body>>
+    )
+#+end_src
+
+**** unliterate
+
+  #+begin_src emacs-lisp :noweb-ref unliterate-consult-use-package-body
+    :bind (;; C-c bindings (mode-specific-map)
+           ("C-c h" . consult-history)
+           ("C-c m" . consult-mode-command)
+           ("C-c k" . consult-kmacro)
+           ;; C-x bindings (ctl-x-map)
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings (goto-map)
+           ("M-g e" . consult-compile-error)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings (search-map)
+           ("M-s d" . consult-find)
+           ("M-s D" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+           ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+
+    ;; The :init configuration is always executed (Not lazy)
+    :init
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
+
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
+
+    ;; Use Consult to select xref locations with preview
+    ;; TODO fix
+    ;; ⛔ Error (use-package): consult/:config: consult-xref is neither a Consult command nor a Consult source
+    ;; (setq xref-show-xrefs-function #'consult-xref
+    ;;       xref-show-definitions-function #'consult-xref)
+
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
+
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key (kbd "M-."))
+    ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+
+    ;; TODO consult-customize out of date now? see error:
+    ;;  corfu/:config: Symbol’s function definition is void: consult-customize
+
+    ;; (consult-customize
+    ;;  consult-theme :preview-key '(:debounce 0.2 any)
+    ;;  consult-ripgrep consult-git-grep consult-grep
+    ;;  consult-bookmark consult-recent-file ;; consult-xref ;; TODO relaed to consult-xref error above
+    ;;  consult--source-bookmark consult--source-file-register
+    ;;  consult--source-recent-file consult--source-project-recent-file
+    ;;  ;; :preview-key (kbd "M-.")
+    ;;  :preview-key '(:debounce 0.4 any))
+
+    ;; Optionally configure the narrowing key.
+    ;; Both < and C-+ work reasonably well.
+    (setq consult-narrow-key "<") ;; (kbd "C-+")
+
+    ;; Optionally make narrowing help available in the minibuffer.
+    ;; You may want to use `embark-prefix-help-command' or which-key instead.
+    ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+    ;; By default `consult-project-function' uses `project-root' from project.el.
+    ;; Optionally configure a different project root function.
+    ;; There are multiple reasonable alternatives to chose from.
+    ;;;; 1. project.el (the default)
+    ;; (setq consult-project-function #'consult--default-project--function)
+    ;;;; 2. projectile.el (projectile-project-root)
+    ;; (autoload 'projectile-project-root "projectile")
+    ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+    ;;;; 3. vc.el (vc-root-dir)
+    ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+    ;;;; 4. locate-dominating-file
+    ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+  #+end_src
+
+*** TODO marginalia                                            :unliterate:
+:PROPERTIES:
+:ID:       f76792a8-9623-4636-8953-977fa24e05f1
+:END:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+;; Enable rich annotations using the Marginalia package
+(use-package marginalia
+  ;; Either bind `marginalia-cycle' globally or only in the minibuffer
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init configuration is always executed (Not lazy!)
+  :init
+
+  ;; Must be in the :init section of use-package such that the mode gets
+  ;; enabled right away. Note that this forces loading the package.
+  (require 'marginalia)
+  (marginalia-mode))
+#+end_src
+
+**** TODO make entry for each line of unliterate config above
+
+*** TODO orderless                                             :unliterate:
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+
+*** beacon
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+(use-package beacon
+  :config
+  (beacon-mode 1))
+#+end_src
+
+*** doom-modeline
+
+#+begin_src emacs-lisp :tangle yes
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode))
+#+end_src
+
+*** all-the-icons
+
+#+begin_src emacs-lisp :tangle yes
+(use-package all-the-icons)
+#+end_src
+
+*** dired
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package dired
+      :ensure nil 
+      :hook (
+  <<dired-hook>>
+             )
+      )
+#+end_src
+
+**** turn on hide-details mode by default
+
+#+begin_src emacs-lisp :noweb-ref dired-hook
+  (dired-mode . dired-hide-details-mode)
+#+end_src
+
+*** org-roam                                                   :unliterate:
+
+    #+begin_src emacs-lisp :noweb yes :tangle yes
+       (use-package org-roam
+         :hook
+         (after-init . org-roam-mode)
+         :config
+         <<org-roam-config>>
+         :bind
+           (
+         <<org-roam-bind>>
+         )
+        )
+      (use-package org-roam-dailies :ensure nil) ;; bundled now?? TODO figure out
+      (use-package org-roam-ui)
+  #+end_src
+
+**** bindings
+
+***** org-roam-dailies-find-today: =C-c r t=
+
+#+begin_src emacs-lisp :noweb-ref org-roam-bind
+("C-c r t" . ' org-roam-dailies-find-today)
+#+end_src
+
+***** org-roam-dailies-find-yesterday: =C-c r y=
+
+#+begin_src emacs-lisp :noweb-ref org-roam-bind
+("C-c r y" . ' org-roam-dailies-find-yesterday)
+#+end_src
+
+***** org-roam-node-find: =C-c r f=
+
+#+begin_src emacs-lisp :noweb-ref org-roam-bind
+("C-c r f" . ' org-roam-node-find)
+#+end_src
+
+***** org-roam-node-insert: =C-c r i=
+
+#+begin_src emacs-lisp :noweb-ref org-roam-bind
+("C-c r i" . ' org-roam-node-insert)
+#+end_src
+
+***** org-roam-node-random: =C-c r r=
+
+#+begin_src emacs-lisp :noweb-ref org-roam-bind
+("C-c r r" . ' org-roam-node-random)
+#+end_src
+
+**** config
+
+***** allow completion to happen anywhere
+
+#+begin_src emacs-lisp :noweb-ref org-roam-config
+  (setq org-roam-completion-everywhere t)
+#+end_src
+
+***** activate auto-sync mode otherwise completion won't work
+
+because hooks aren't added to find-file [[file:elpa/org-roam-20221231.2122/org-roam-db.el::add-hook 'find-file-hook #'org-roam-db-autosync--setup-file-h][here]]
+
+#+begin_src emacs-lisp :noweb-ref org-roam-config
+(org-roam-db-autosync-mode)
+#+end_src
+
+*** winner-mode
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package winner
+    :ensure nil
+    :config
+    (winner-mode 1))
+#+end_src
+*** tramp
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package tramp
+      :ensure nil
+      :config
+      <<tramp-config>>
+  )
+#+end_src
+
+*** savehist-mode                                              :unliterate:
+
+#+begin_src emacs-lisp :tangle yes
+(use-package savehist
+  :config
+  (setq history-length 10000
+        history-delete-duplicates t
+        savehist-save-minibuffer-history t
+        savehist-additional-variables '(kill-ring
+                                        search-ring
+					<<savehist-additional-variable>>
+                                        regexp-search-ring))
+  (savehist-mode))
+#+end_src
+
+*** eww
+:PROPERTIES:
+:ID:       CDF7A6F3-5740-4B90-8C0A-206FADA1A00B
+:END:
+
+#+begin_src emacs-lisp :tangle yes :noweb yes
+(use-package eww
+  :config
+  <<eww-config>>
+  )
+#+end_src
+
+**** persist eww history
+
+#+begin_src emacs-lisp :noweb-ref eww-config
+(setq eww-history-limit 10000)
+#+end_src
+
+#+begin_src emacs-lisp :noweb-ref savehist-additional-variable
+eww-history
+#+end_src
+
+**** rename eww buffer based on webpage title
+
+#+begin_src emacs-lisp :noweb-ref eww-config
+(setq eww-auto-rename-buffer t)
+#+end_src
+
+*** saveplace-mode
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+    (save-place-mode 1)
+#+end_src
+
+*** recentf-mode
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(recentf-mode 1)
+#+end_src
+
+*** olivetti
+
+#+begin_src emacs-lisp :tangle yes
+(use-package olivetti
+  :after org
+  :config
+  (setq-default olivetti-body-width 80)
+  (setq-default olivetti-minimum-body-width 65)
+  :hook
+  (org-mode . olivetti-mode))
+#+end_src
+
+*** corfu
+
+#+begin_src emacs-lisp :noweb yes :tangle yes
+  ;; (require 'corfu)  ;; TODO Remove This HACK because I don't know how to use an autoload in a custom emacs lisp package in nix
+  (use-package corfu
+    ;; Optional customizations
+    :custom
+    ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+
+    ;; I changed auto to nil because I think completion should be done on purpose
+    ;; you can do it with M-TAB by default
+    (corfu-auto nil)
+
+    ;; (corfu-commit-predicate nil)   ;; Do not commit selected candidates on next input
+    (corfu-quit-at-boundary nil)     ;; Automatically quit at word boundary
+    (corfu-quit-no-match t)        ;; Automatically quit if there is no match
+    ;; (corfu-echo-documentation nil) ;; Do not show documentation in the echo area
+
+    ;; You may want to enable   Corfu only for certain modes.
+    ;; :hook ((prog-mode . corfu-mode)
+    ;;        (shell-mode . corfu-mode)
+    ;;        (eshell-mode . corfu-mode))
+
+    ;; Recommended: Enable Corfu globally.
+    ;; This is recommended since dabbrev can be used globally (M-/).
+    :config
+
+    (defun corfu-enable-always-in-minibuffer ()
+    "Enable Corfu in the minibuffer if Vertico/Mct are not active."
+    (unless (or (bound-and-true-p mct--active)
+                (bound-and-true-p vertico--input))
+      (setq-local corfu-auto t) ;; enable corfu-auto in minibuffer
+      (corfu-mode 1)))
+    (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
+
+    ;; TODO consult-customize out of date now? see error:
+    ;;  corfu/:config: Symbol’s function definition is void: consult-customize
+    ;; (consult-customize
+    ;;  consult-theme
+    ;;  :preview-key '(:debounce 0.2 any)
+    ;;  consult-ripgrep consult-git-grep consult-grep
+    ;;  consult-bookmark consult-recent-file ;; consult-xref ;; TODO xref get deleted?
+    ;;  consult--source-bookmark consult--source-recent-file
+    ;;  consult--source-project-recent-file
+    ;;  :preview-key (kbd "M-."))
+
+    (setq consult-narrow-key "<") ;; (kbd "C-+")
+
+    (global-corfu-mode))
+#+end_src
+
+*** embark
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package embark
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :config
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
+
+*** keycast mode
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package keycast
+    :config
+    (define-minor-mode keycast-mode
+      "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
+      :global t
+      (if keycast-mode
+          (add-hook 'pre-command-hook 'keycast--update t)
+        (remove-hook 'pre-command-hook 'keycast--update)))
+    (add-to-list 'global-mode-string '("" keycast-mode-line)))
+#+end_src
+
+*** gif-screencast-mode 
+:PROPERTIES:
+:ID:       F3538C74-0BEC-46FE-BBF8-C01D9AC1F25D
+:END:
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package gif-screencast
+    ;; NOTE requires the deps: imagemagick gifsicle scrot
+    ;;:ensure-system-package (gifsicle
+    ;;                        mogrify
+    ;;                        imagemagick)
+    :init
+    (setq gif-screencast-screenshot-directory "~/downloads/screencasts/tmp")
+    (setq gif-screencast-output-directory "~/downloads/screencasts")
+    :bind
+    (([f11] . gif-screencast)
+     ([f12] . gif-screencast-stop)))
+#+end_src
+
+*** nix-mode
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package nix-mode)
+#+end_src
+
+*** magit
+
+#+begin_src emacs-lisp :tangle yes
+(use-package magit)
+#+end_src
+
+*** tabspaces                                                  :unliterate:
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package tabspaces
+    :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+    :commands (tabspaces-switch-or-create-workspace
+               tabspaces-open-or-create-project-and-workspace)
+    :custom
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    ;; sessions
+    (tabspaces-session t)
+    (tabspaces-session-auto-restore t))
+
+  ;; Filter Buffers for Consult-Buffer
+
+(with-eval-after-load 'consult
+;; hide full buffer list (still available with "b" prefix)
+(consult-customize consult--source-buffer :hidden t :default nil)
+;; set consult-workspace buffer list
+(defvar consult--source-workspace
+  (list :name     "Workspace Buffers"
+        :narrow   ?w
+        :history  'buffer-name-history
+        :category 'buffer
+        :state    #'consult--buffer-state
+        :default  t
+        :items    (lambda () (consult--buffer-query
+                         :predicate #'tabspaces--local-buffer-p
+                         :sort 'visibility
+                         :as #'buffer-name)))
+
+  "Set workspace buffer list for consult-buffer.")
+(add-to-list 'consult-buffer-sources 'consult--source-workspace))
+#+end_src
+
+*** ob-mongo                                                   :unliterate:
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package ob-mongo
+    :config
+    )
+#+end_src
+
+**** usage
+
+#+begin_src mongo :db mongodb://localhost:27017/itprotv_local
+db.employees.count({country: "gb"});
+#+end_src
+
+** discoverability
+
+*** context menu mode
+:PROPERTIES:
+:ID:       178e8f77-1324-43fb-a6f5-074801326562
+:END:
+
+#+begin_src emacs-lisp :noweb-ref emacs-config
+(context-menu-mode 1)
+#+end_src
+
+*** [[id:521cb647-37e6-4454-be9b-c97a0bbc7f76][ensure menu-bar is always active]]
+
+** various weirdnesses                                             :ARCHIVE:
+
+*** TODO we have to tangle prepend =lexical-binding: t= to everything we tangle right?
+
+**** for instance I think [[*core/bench][core/bench]] depends on lexical binding
+
+**** then again maybe it was just some of my custom code?
+
+* Tangling plumbing
+
+** Tangle and reload on save
+
+*** local variables
+:PROPERTIES:
+:ID:       56711589-4af8-4efa-83b4-fa8acfb2869e
+:END:
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook (lambda () (load-file (concat (locate-dominating-file buffer-file-name "discoverable-emacs.el") "discoverable-emacs.el") )) nil t)
+# eval: (add-hook 'after-save-hook (lambda () (core/emacs-tangle-and-show-alert-with-cpu-time)) nil t)
+# org-link-elisp-skip-confirm-regexp: "."
+# org-id-link-to-org-use-id: create-if-interactive
+# End:
+ 
+*** notes on [[id:56711589-4af8-4efa-83b4-fa8acfb2869e][local variables]]
+
+**** =org-link-elisp-skip-confirm-regexp=
+
+***** this makes links executable without confirmation (e.g. [[elisp:(emacs-version)]])
+
+**** =(concat (locate-dominating-file buffer-file-name "discoverable-emacs.el") "discoverable-emacs.el")=
+
+Because using =emacs -Q= the value =user-init-file= is nil and I wanted to preserve testing eaisly with =Emacs -Q= I had to change this:
+
+#+begin_example
+# eval: (add-hook 'after-save-hook (lambda () (load-file user-init-file)) nil t)
+#+end_example
+
+to this:
+
+#+begin_example
+# eval: (add-hook 'after-save-hook (lambda () (load-file (concat (locate-dominating-file buffer-file-name "discoverable-emacs.el") "discoverable-emacs.el") )) nil t)
+#+end_example
+ 
+*** depends on
+
+**** [[*core/emacs-tangle-and-show-alert-with-cpu-time][core/emacs-tangle-and-show-alert-with-cpu-time]]
+
+*** TODO replace non-uuid links with uuid
+
+*** TODO set =org-id-link-to-org-use-id= Local variable to work with emacs users that don't default to that or someone using =Emacs -Q=
+
+#+begin_example
+# org-id-link-to-org-use-id: create-if-interactive
+#+end_example
+
