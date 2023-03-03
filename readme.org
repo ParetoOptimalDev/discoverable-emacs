@@ -9,3 +9,5 @@ git clone https://github.com/ParetoOptimalDev/discoverable-emacs.git
 cd discoverable-emacs
 nix-develop -c emacs-wrapper --init-directory=.
 #+end_src
+
+NOTE: adding new packages requires closing emacs and rerunning `nix-develop -c emacs-wrapper --init-directory=.`
