@@ -9,3 +9,7 @@ git clone https://github.com/ParetoOptimalDev/discoverable-emacs.git
 cd discoverable-emacs
 emacs --init-directory=.
 #+end_src
+
+Feel free to tryout the [nix version branch](https://github.com/ParetoOptimalDev/discoverable-emacs/tree/nix-version) if you don't  already have emacs installed.
+
+NOTE: adding new packages requires restarting emacs with the nix-version for now.
